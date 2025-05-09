@@ -1,0 +1,25 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 30
+    },
+    "auditLog": "F:\\TeamProject\\WorkStationFlow-X\\logs\\.19738d29505b223516e3a040967a12decfff023d-audit.json",
+    "files": [
+        {
+            "date": 1746619891912,
+            "name": "F:\\TeamProject\\WorkStationFlow-X\\logs\\2025-05-07-app.log",
+            "hash": "2d2ca13e41c4ef2be418c00afe159f6c14463349418fb8fe15b1b0fe3127083c"
+        },
+        {
+            "date": 1746719254484,
+            "name": "F:\\TeamProject\\WorkStationFlow-X\\logs\\2025-05-08-app.log",
+            "hash": "d854ffbdd2a0e36713d6cfc8f6872fb3693f268bd19ec2eb58cd23182d8cf695"
+        },
+        {
+            "date": 1746727408134,
+            "name": "F:\\TeamProject\\WorkStationFlow-X\\logs\\2025-05-09-app.log",
+            "hash": "c5ef7fa4fde06fc1c39bfdb30b0dcedff2236f043a4b83cf53720c6a3110ed70"
+        }
+    ],
+    "hashType": "sha256"
+}
