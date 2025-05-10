@@ -19,12 +19,12 @@ const companySchema = new Schema<ICompany>(
     paymentInfo: {
       paymentId: { type: String, default: null },
       expireDate: { type: Date, default: null },
-      status: {
-        type: String,
-        enum: companyPaymentStatus,
-        required: true,
-        default: "UNPAID",
-      },
+    },
+    status: {
+      type: String,
+      enum: companyPaymentStatus,
+      required: true,
+      default: "UNPAID",
     },
   },
   {

@@ -32,6 +32,12 @@ const userSchema = new Schema<IUser>({
     },
     ref: "Branch", // assuming you have a Branch model
   },
+  status: {
+    type: String,
+    required: function (this: any) {
+      return ["MANAGER", "EMPLOYEE", "LEADER"].includes(this.role);
+    },
+  },
 });
 
 userSchema.methods.comparePassword = async function (enteredPassword: string) {

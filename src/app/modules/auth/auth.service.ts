@@ -2,23 +2,21 @@
 import status from "http-status";
 import AppError from "../../errors/AppError";
 import User from "../users/user/user.model";
-
 import { jsonWebToken } from "../../utils/jwt/jwt";
-
-import { UserProfile } from "../users/userProfile/userProfile.model";
 import getExpiryTime from "../../utils/helper/getExpiryTime";
 import getOtp from "../../utils/helper/getOtp";
 import { sendEmail } from "../../utils/sendEmail";
 import getHashedPassword from "../../utils/helper/getHashedPassword";
 import { appConfig } from "../../config";
+import { ICompany } from "../bussiness/company/company.interface";
 
 const userLogin = async (loginData: {
   email: string;
   password: string;
 }): Promise<{ accessToken: string; userData: any; refreshToken: string }> => {
-  const userData = await User.findOne({ email: loginData.email }).select(
-    "+password"
-  );
+  const userData = await User.findOne({ email: loginData.email })
+    .select("+password")
+    .populate("companyId");
   if (!userData) {
     throw new AppError(status.BAD_REQUEST, "Please check your email");
   }
@@ -31,6 +29,19 @@ const userLogin = async (loginData: {
 
   if (!isPassMatch) {
     throw new AppError(status.BAD_REQUEST, "Please check your password.");
+  }
+  const companyData = userData.companyId as unknown as ICompany;
+  if (
+    companyData &&
+    userData.role === "OWNER" &&
+    (companyData.status === "UNPAID" ||
+      companyData.status === "DEACTIVATED" ||
+      companyData.status === "REJECTED")
+  ) {
+    throw new AppError(
+      status.BAD_REQUEST,
+      `Your company account status is ${companyData.status}`
+    );
   }
 
   const jwtPayload = {
@@ -74,25 +85,25 @@ const verifyUser = async (
   if (!otp) {
     throw new AppError(status.BAD_REQUEST, "Give the Code. Check your email.");
   }
-  const user = (await UserProfile.findOne({ email }).populate("user")) as any;
+  const user = await User.findOne({ email });
   if (!user) {
     throw new AppError(status.BAD_REQUEST, "User not found");
   }
 
   const currentDate = new Date();
-  const expirationDate = new Date(user.user.authentication.expDate);
+  const expirationDate = new Date(user.authentication.expDate);
 
   if (currentDate > expirationDate) {
     throw new AppError(status.BAD_REQUEST, "Code time expired.");
   }
 
-  if (otp !== user.user.authentication.otp) {
+  if (otp !== user.authentication.otp) {
     throw new AppError(status.BAD_REQUEST, "Code not matched.");
   }
 
   let updatedUser;
   let token = null;
-  if (user.user.isVerified) {
+  if (user.isVerified) {
     token = jsonWebToken.generateToken(
       { userEmail: user.email },
       appConfig.jwt.jwt_access_secret as string,
@@ -211,7 +222,8 @@ const resetPassword = async (
     { email: decode.userEmail },
     {
       password: hassedPassword,
-      authentication: { otp: null, token: null, expDate: null },   needToResetPass: false,
+      authentication: { otp: null, token: null, expDate: null },
+      needToResetPass: false,
     },
     { new: true }
   );
@@ -319,11 +331,13 @@ const reSendOtp = async (userEmail: string) => {
   await sendEmail(userEmail, "Verification Code", `CODE: ${OTP}`);
   return { message: "Verification code send." };
 };
+
 export const AuthService = {
   userLogin,
   verifyUser,
   forgotPasswordRequest,
   resetPassword,
   getNewAccessToken,
-  updatePassword,  reSendOtp,
+  updatePassword,
+  reSendOtp,
 };

@@ -36,16 +36,18 @@ const createCompany = async (data: {
     maxEmployee: data.companyData.maxEmployee,
     cId: "iio",
   };
+
+  const userProfileData = {
+    fullName: data.ownerData.fullName,
+    phone: data.ownerData.phone,
+  };
+
   let createdCompany;
   createdCompany = await Company.create(companyData);
   logger.info("create company");
   const userData = {
     email: data.ownerData.email,
     password: await getHashedPassword(data.ownerData.password),
-  };
-  const userProfileData = {
-    fullName: data.ownerData.fullName,
-    phone: data.ownerData.phone,
   };
 
   const createdUser = await User.create({

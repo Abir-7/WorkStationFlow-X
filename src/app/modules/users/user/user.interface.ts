@@ -14,8 +14,12 @@ export interface IBaseUser {
   };
   isVerified: boolean;
   needToResetPass: boolean;
+  status: TUserStatus;
 }
 
+export const userStatus = ["WORKING", "TERMINATED", "RESIGNED"] as const;
+
+export type TUserStatus = (typeof userStatus)[number];
 export interface IUser extends IBaseUser, Document {
   comparePassword(enteredPassword: string): Promise<boolean>;
 }
