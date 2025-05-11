@@ -78,7 +78,8 @@ export const auth =
           if (
             companyData?.status === "DEACTIVATED" ||
             companyData?.status === "REJECTED" ||
-            companyData?.status === "UNPAID"
+            companyData?.status === "UNPAID" ||
+            companyData?.status === "PENDING"
           ) {
             return next(
               new AppError(
@@ -100,7 +101,6 @@ export const auth =
       }
       //--------------------------------------------------------
       req.user = decodedData;
-
       return next();
     } catch (error) {
       return next(

@@ -13,7 +13,7 @@ export interface ICompany {
   website: string;
   owner: Types.ObjectId;
   paymentInfo: {
-    paymentId: string;
+    paymentId: Types.ObjectId;
     expireDate: Date;
   };
   status: TCompanyPaymentStatus;
@@ -24,6 +24,7 @@ export const companyPaymentStatus = [
   "DEACTIVATED",
   "UNPAID",
   "REJECTED",
+  "PENDING",
 ] as const;
 
 export type TCompanyPaymentStatus = (typeof companyPaymentStatus)[number];

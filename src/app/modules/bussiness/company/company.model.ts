@@ -1,4 +1,4 @@
-import { Schema, model } from "mongoose";
+import { Schema, Types, model } from "mongoose";
 import { companyPaymentStatus, ICompany } from "./company.interface";
 
 const companySchema = new Schema<ICompany>(
@@ -17,14 +17,14 @@ const companySchema = new Schema<ICompany>(
       ref: "User",
     },
     paymentInfo: {
-      paymentId: { type: String, default: null },
+      paymentId: { type: Types.ObjectId, default: null, ref: "Payment" },
       expireDate: { type: Date, default: null },
     },
     status: {
       type: String,
       enum: companyPaymentStatus,
       required: true,
-      default: "UNPAID",
+      default: "PENDING",
     },
   },
   {
