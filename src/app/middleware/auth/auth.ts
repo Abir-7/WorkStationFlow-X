@@ -7,6 +7,7 @@ import { TUserRole } from "../../interface/auth.interface";
 import { jsonWebToken } from "../../utils/jwt/jwt";
 import { appConfig } from "../../config";
 import User from "../../modules/users/user/user.model";
+import { Company } from "../../modules/bussiness/company/company.model";
 
 export const auth =
   (...userRole: TUserRole[]) =>
@@ -56,6 +57,48 @@ export const auth =
         );
       }
 
+      //--------------------------------------------------------
+      //check employee working status and company
+      if (
+        userData.role === "EMPLOYEE" ||
+        userData.role === "LEADER" ||
+        userData.role === "MANAGER"
+      ) {
+        if (
+          userData.status === "RESIGNED" ||
+          userData.status === "TERMINATED"
+        ) {
+          return next(
+            new AppError(status.UNAUTHORIZED, `You are ${userData.status}.`)
+          );
+        }
+
+        if (userData.companyId) {
+          const companyData = await Company.findById(userData.companyId);
+          if (
+            companyData?.status === "DEACTIVATED" ||
+            companyData?.status === "REJECTED" ||
+            companyData?.status === "UNPAID"
+          ) {
+            return next(
+              new AppError(
+                status.UNAUTHORIZED,
+                `Your company is ${companyData?.status}.`
+              )
+            );
+          }
+        }
+
+        if (!userData.companyId) {
+          return next(
+            new AppError(
+              status.UNAUTHORIZED,
+              "You don't have connection with any company."
+            )
+          );
+        }
+      }
+      //--------------------------------------------------------
       req.user = decodedData;
 
       return next();
