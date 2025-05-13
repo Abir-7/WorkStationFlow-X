@@ -19,6 +19,18 @@ const createPayment = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const verifyPayment = catchAsync(async (req: Request, res: Response) => {
+  const paymentId = req.body.paymentId;
+  const result = await PaymentService.verifyPayment(paymentId);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: status.CREATED,
+    message: "Payment verified successfully",
+    data: result,
+  });
+});
+
 // Get a single payment by ID
 const getPaymentById = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
@@ -88,4 +100,5 @@ export const PaymentController = {
   getAllPayments,
   updatePayment,
   deletePayment,
+  verifyPayment,
 };

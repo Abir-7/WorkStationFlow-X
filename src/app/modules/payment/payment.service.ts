@@ -60,7 +60,7 @@ const createPayment = async (data: {
     companydata.status === "HOLD"
   ) {
     throw new AppError(
-      status.NOT_FOUND,
+      status.BAD_REQUEST,
       `Your Company status is:${companydata.status}`
     );
   }
@@ -89,6 +89,24 @@ const createPayment = async (data: {
   companydata.status = "HOLD";
   companydata.paymentInfo.expireDate = new Date(year, month, 10);
   return await companydata.save();
+};
+
+const verifyPayment = async (id: string) => {
+  const data = await Payment.findOne({ _id: id.trim() });
+
+  if (!data) {
+    throw new AppError(status.NOT_FOUND, "Payment data not found");
+  }
+
+  const companyData = await Company.findOne({
+    _id: data.companyId,
+    owner: data.user,
+  });
+  if (!companyData) {
+    throw new AppError(status.NOT_FOUND, "Company data not found");
+  }
+  companyData.status = "ACTIVATED";
+  return await companyData.save();
 };
 
 // Get a single payment by ID
@@ -127,6 +145,7 @@ const deletePayment = async (id: string) => {
 
 export const PaymentService = {
   createPayment,
+  verifyPayment,
   getPaymentById,
   getAllPayments,
   updatePayment,
