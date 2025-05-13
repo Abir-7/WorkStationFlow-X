@@ -42,4 +42,8 @@ exports.appConfig = {
     user: {
         password: process.env.USER_PASSWORD,
     },
+    paymentMethod: {
+        storeId: process.env.STORE_ID,
+        signatureKey: process.env.SIGNATURE_KEY,
+    },
 };

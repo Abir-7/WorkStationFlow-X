@@ -23,7 +23,7 @@ app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: true }));
 app.use("/api", routes_1.default);
 app.get("/", (req, res) => {
-    res.send("Hello World! This app name is Ai_Finance_Hub");
+    res.send("Hello World! This app name is WorkFlow-X");
 });
 app.use(express_1.default.static(path_1.default.join(process.cwd(), "uploads")));
 app.use(globalErrorHandler_1.globalErrorHandler);

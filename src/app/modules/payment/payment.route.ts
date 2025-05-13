@@ -4,7 +4,7 @@ import { PaymentController } from "./payment.controller";
 const router = express.Router();
 
 // Route to create a payment
-router.post("/", PaymentController.createPayment);
+router.post("/make-payment", PaymentController.createPayment);
 
 // Route to get all payments
 router.get("/", PaymentController.getAllPayments);

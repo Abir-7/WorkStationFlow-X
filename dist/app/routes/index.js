@@ -4,11 +4,13 @@ const express_1 = require("express");
 const user_route_1 = require("../modules/users/user/user.route");
 const auth_route_1 = require("../modules/auth/auth.route");
 const company_route_1 = require("../modules/bussiness/company/company.route");
+const payment_route_1 = require("../modules/payment/payment.route");
 const router = (0, express_1.Router)();
 const apiRoutes = [
     { path: "/user", route: user_route_1.UserRoute },
     { path: "/auth", route: auth_route_1.AuthRoute },
     { path: "/company", route: company_route_1.CompanyRoute },
+    { path: "/payment", route: payment_route_1.PaymentRoutes },
 ];
 apiRoutes.forEach((route) => router.use(route.path, route.route));
 exports.default = router;

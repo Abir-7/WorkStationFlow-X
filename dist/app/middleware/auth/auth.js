@@ -18,6 +18,7 @@ const http_status_1 = __importDefault(require("http-status"));
 const jwt_1 = require("../../utils/jwt/jwt");
 const config_1 = require("../../config");
 const user_model_1 = __importDefault(require("../../modules/users/user/user.model"));
+const company_model_1 = require("../../modules/bussiness/company/company.model");
 const auth = (...userRole) => (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const tokenWithBearer = req.headers.authorization;
@@ -40,6 +41,38 @@ const auth = (...userRole) => (req, res, next) => __awaiter(void 0, void 0, void
             userData.email !== decodedData.userEmail) {
             return next(new AppError_1.default(http_status_1.default.UNAUTHORIZED, "You are not authorized"));
         }
+        //--------------------------------------------------------
+        //check employee working status and company
+        if (userData.role === "EMPLOYEE" ||
+            userData.role === "LEADER" ||
+            userData.role === "MANAGER") {
+            if (userData.status === "RESIGNED" ||
+                userData.status === "TERMINATED") {
+                return next(new AppError_1.default(http_status_1.default.UNAUTHORIZED, `You are ${userData.status}.`));
+            }
+            if (userData.companyId) {
+                const companyData = yield company_model_1.Company.findById(userData.companyId);
+                if ((companyData === null || companyData === void 0 ? void 0 : companyData.status) === "DEACTIVATED" ||
+                    (companyData === null || companyData === void 0 ? void 0 : companyData.status) === "REJECTED" ||
+                    (companyData === null || companyData === void 0 ? void 0 : companyData.status) === "HOLD" ||
+                    (companyData === null || companyData === void 0 ? void 0 : companyData.status) === "PENDING" ||
+                    (companyData === null || companyData === void 0 ? void 0 : companyData.status) === "ACCEPTED") {
+                    return next(new AppError_1.default(http_status_1.default.UNAUTHORIZED, `${(companyData === null || companyData === void 0 ? void 0 : companyData.status) === "DEACTIVATED"
+                        ? "Your Company is DEACTIVATED."
+                        : (companyData === null || companyData === void 0 ? void 0 : companyData.status) === "REJECTED"
+                            ? "Your Company is REJECTED."
+                            : (companyData === null || companyData === void 0 ? void 0 : companyData.status) === "HOLD"
+                                ? "Wait for verify your payment"
+                                : (companyData === null || companyData === void 0 ? void 0 : companyData.status) === "PENDING"
+                                    ? "Your company is under review"
+                                    : "Your company is accepted, you can pay now."}`));
+                }
+            }
+            if (!userData.companyId) {
+                return next(new AppError_1.default(http_status_1.default.UNAUTHORIZED, "You don't have connection with any company."));
+            }
+        }
+        //--------------------------------------------------------
         req.user = decodedData;
         return next();
     }

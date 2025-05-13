@@ -20,11 +20,12 @@ export interface ICompany {
 }
 
 export const companyPaymentStatus = [
-  "ACTIVATED",
-  "DEACTIVATED",
-  "UNPAID",
-  "REJECTED",
-  "PENDING",
+  "ACTIVATED", // when payment done in time
+  "DEACTIVATED", // when payment not done in time
+  "HOLD", // payment done wait for payment review
+  "ACCEPTED", // accepted after review
+  "REJECTED", // rejected after review
+  "PENDING", // details under review
 ] as const;
 
 export type TCompanyPaymentStatus = (typeof companyPaymentStatus)[number];

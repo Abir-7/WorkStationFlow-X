@@ -43,6 +43,12 @@ const userSchema = new mongoose_1.Schema({
         },
         ref: "Branch", // assuming you have a Branch model
     },
+    status: {
+        type: String,
+        required: function () {
+            return ["MANAGER", "EMPLOYEE", "LEADER"].includes(this.role);
+        },
+    },
 });
 userSchema.methods.comparePassword = function (enteredPassword) {
     return __awaiter(this, void 0, void 0, function* () {

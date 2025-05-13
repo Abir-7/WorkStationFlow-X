@@ -78,13 +78,24 @@ export const auth =
           if (
             companyData?.status === "DEACTIVATED" ||
             companyData?.status === "REJECTED" ||
-            companyData?.status === "UNPAID" ||
-            companyData?.status === "PENDING"
+            companyData?.status === "HOLD" ||
+            companyData?.status === "PENDING" ||
+            companyData?.status === "ACCEPTED"
           ) {
             return next(
               new AppError(
                 status.UNAUTHORIZED,
-                `Your company is ${companyData?.status}.`
+                `${
+                  companyData?.status === "DEACTIVATED"
+                    ? "Your Company is DEACTIVATED."
+                    : companyData?.status === "REJECTED"
+                    ? "Your Company is REJECTED."
+                    : companyData?.status === "HOLD"
+                    ? "Wait for verify your payment"
+                    : companyData?.status === "PENDING"
+                    ? "Your company is under review"
+                    : "Your company is accepted, you can pay now."
+                }`
               )
             );
           }

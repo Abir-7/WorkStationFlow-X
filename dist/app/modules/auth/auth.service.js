@@ -18,14 +18,15 @@ const http_status_1 = __importDefault(require("http-status"));
 const AppError_1 = __importDefault(require("../../errors/AppError"));
 const user_model_1 = __importDefault(require("../users/user/user.model"));
 const jwt_1 = require("../../utils/jwt/jwt");
-const userProfile_model_1 = require("../users/userProfile/userProfile.model");
 const getExpiryTime_1 = __importDefault(require("../../utils/helper/getExpiryTime"));
 const getOtp_1 = __importDefault(require("../../utils/helper/getOtp"));
 const sendEmail_1 = require("../../utils/sendEmail");
 const getHashedPassword_1 = __importDefault(require("../../utils/helper/getHashedPassword"));
 const config_1 = require("../../config");
 const userLogin = (loginData) => __awaiter(void 0, void 0, void 0, function* () {
-    const userData = yield user_model_1.default.findOne({ email: loginData.email }).select("+password");
+    const userData = yield user_model_1.default.findOne({ email: loginData.email })
+        .select("+password")
+        .populate("companyId");
     if (!userData) {
         throw new AppError_1.default(http_status_1.default.BAD_REQUEST, "Please check your email");
     }
@@ -35,6 +36,24 @@ const userLogin = (loginData) => __awaiter(void 0, void 0, void 0, function* () 
     const isPassMatch = yield userData.comparePassword(loginData.password);
     if (!isPassMatch) {
         throw new AppError_1.default(http_status_1.default.BAD_REQUEST, "Please check your password.");
+    }
+    const companyData = userData.companyId;
+    if (companyData &&
+        userData.role === "OWNER" &&
+        (companyData.status === "HOLD" ||
+            companyData.status === "DEACTIVATED" ||
+            companyData.status === "REJECTED" ||
+            companyData.status === "ACCEPTED" ||
+            companyData.status === "PENDING")) {
+        throw new AppError_1.default(http_status_1.default.BAD_REQUEST, `${(companyData === null || companyData === void 0 ? void 0 : companyData.status) === "DEACTIVATED"
+            ? "Your Company is DEACTIVATED."
+            : (companyData === null || companyData === void 0 ? void 0 : companyData.status) === "REJECTED"
+                ? "Your Company is REJECTED."
+                : (companyData === null || companyData === void 0 ? void 0 : companyData.status) === "HOLD"
+                    ? "Wait for verify your payment"
+                    : (companyData === null || companyData === void 0 ? void 0 : companyData.status) === "PENDING"
+                        ? "Your company is under review"
+                        : "Your company is accepted, you can pay now."}`);
     }
     const jwtPayload = {
         userEmail: userData.email,
@@ -53,21 +72,21 @@ const verifyUser = (email, otp) => __awaiter(void 0, void 0, void 0, function* (
     if (!otp) {
         throw new AppError_1.default(http_status_1.default.BAD_REQUEST, "Give the Code. Check your email.");
     }
-    const user = (yield userProfile_model_1.UserProfile.findOne({ email }).populate("user"));
+    const user = yield user_model_1.default.findOne({ email });
     if (!user) {
         throw new AppError_1.default(http_status_1.default.BAD_REQUEST, "User not found");
     }
     const currentDate = new Date();
-    const expirationDate = new Date(user.user.authentication.expDate);
+    const expirationDate = new Date(user.authentication.expDate);
     if (currentDate > expirationDate) {
         throw new AppError_1.default(http_status_1.default.BAD_REQUEST, "Code time expired.");
     }
-    if (otp !== user.user.authentication.otp) {
+    if (otp !== user.authentication.otp) {
         throw new AppError_1.default(http_status_1.default.BAD_REQUEST, "Code not matched.");
     }
     let updatedUser;
     let token = null;
-    if (user.user.isVerified) {
+    if (user.isVerified) {
         token = jwt_1.jsonWebToken.generateToken({ userEmail: user.email }, config_1.appConfig.jwt.jwt_access_secret, "10m");
         const expDate = (0, getExpiryTime_1.default)(10);
         updatedUser = yield user_model_1.default.findOneAndUpdate({ email: user.email }, {
@@ -130,7 +149,8 @@ const resetPassword = (token, userData) => __awaiter(void 0, void 0, void 0, fun
     const hassedPassword = yield (0, getHashedPassword_1.default)(new_password);
     const updateData = yield user_model_1.default.findOneAndUpdate({ email: decode.userEmail }, {
         password: hassedPassword,
-        authentication: { otp: null, token: null, expDate: null }, needToResetPass: false,
+        authentication: { otp: null, token: null, expDate: null },
+        needToResetPass: false,
     }, { new: true });
     if (!updateData) {
         throw new AppError_1.default(http_status_1.default.BAD_REQUEST, "Failed to reset password. Try again.");
@@ -197,5 +217,6 @@ exports.AuthService = {
     forgotPasswordRequest,
     resetPassword,
     getNewAccessToken,
-    updatePassword, reSendOtp,
+    updatePassword,
+    reSendOtp,
 };

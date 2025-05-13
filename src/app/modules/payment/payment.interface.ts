@@ -1,5 +1,7 @@
+import { Types } from "mongoose";
+
 export enum PaymentMethod {
-  BIKASH = "bikash",
+  BIKASH = "bkash",
   NAGAD = "nagad",
   ROKET = "roket",
 }
@@ -7,12 +9,9 @@ export enum PaymentMethod {
 export interface IPayment {
   amount: number;
   method: PaymentMethod;
-  status: string;
-  user: string; // Renamed from userId
-  companyId: string; // Added companyId
-  mobileNumber: string;
+  user: Types.ObjectId;
+  companyId: Types.ObjectId;
+  mobile: string;
   txId: string;
   expDate: Date;
-  createdAt: Date;
-  updatedAt: Date;
 }

@@ -34,13 +34,25 @@ const userLogin = async (loginData: {
   if (
     companyData &&
     userData.role === "OWNER" &&
-    (companyData.status === "UNPAID" ||
+    (companyData.status === "HOLD" ||
       companyData.status === "DEACTIVATED" ||
-      companyData.status === "REJECTED")
+      companyData.status === "REJECTED" ||
+      companyData.status === "ACCEPTED" ||
+      companyData.status === "PENDING")
   ) {
     throw new AppError(
       status.BAD_REQUEST,
-      `Your company account status is ${companyData.status}`
+      `${
+        companyData?.status === "DEACTIVATED"
+          ? "Your Company is DEACTIVATED."
+          : companyData?.status === "REJECTED"
+          ? "Your Company is REJECTED."
+          : companyData?.status === "HOLD"
+          ? "Wait for verify your payment"
+          : companyData?.status === "PENDING"
+          ? "Your company is under review"
+          : "Your company is accepted, you can pay now."
+      }`
     );
   }
 

@@ -8,18 +8,7 @@ import { PaymentMethod } from "./payment.interface";
 
 // Create a new payment
 const createPayment = catchAsync(async (req: Request, res: Response) => {
-  const paymentData: {
-    amount: number;
-    method: PaymentMethod;
-    status: string;
-    user: string; // Renamed from userId
-    companyId: string; // Added companyId
-    mobileNumber: string;
-    txId: string;
-    expDate: Date;
-    createdAt: Date;
-    updatedAt: Date;
-  } = req.body;
+  const paymentData = req.body;
   const result = await PaymentService.createPayment(paymentData);
 
   sendResponse(res, {
