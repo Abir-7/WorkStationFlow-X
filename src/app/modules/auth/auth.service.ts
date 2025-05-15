@@ -14,6 +14,9 @@ const userLogin = async (loginData: {
   email: string;
   password: string;
 }): Promise<{ accessToken: string; userData: any; refreshToken: string }> => {
+  const otp = getOtp(4);
+  const expDate = getExpiryTime(10);
+
   const userData = await User.findOne({ email: loginData.email })
     .select("+password")
     .populate("companyId");
@@ -22,7 +25,21 @@ const userLogin = async (loginData: {
   }
 
   if (userData.isVerified === false) {
-    throw new AppError(status.BAD_REQUEST, "Please verify your email.");
+    // Send email outside the transaction
+
+    userData.authentication.otp = otp;
+    userData.authentication.expDate = expDate;
+    console.log(userData.email);
+    await sendEmail(
+      userData.email,
+      "Email Verification Code",
+      `Your code is: ${otp}`
+    );
+    await userData.save();
+    throw new AppError(
+      status.BAD_REQUEST,
+      "Please verify your email. Check your email."
+    );
   }
 
   const isPassMatch = await userData.comparePassword(loginData.password);

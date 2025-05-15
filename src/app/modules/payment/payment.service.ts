@@ -17,7 +17,6 @@ const createPayment = async (data: {
   txId: string;
 }) => {
   const userData = await User.findOne({ email: data.email });
-
   if (!userData) {
     throw new AppError(status.NOT_FOUND, "No user found with that email");
   }
@@ -46,7 +45,6 @@ const createPayment = async (data: {
   };
 
   const companydata = await Company.findOne({
-    owner: userData._id,
     _id: userData.companyId,
   });
 
@@ -54,11 +52,7 @@ const createPayment = async (data: {
     throw new AppError(status.NOT_FOUND, "Your Company not found");
   }
 
-  if (
-    companydata.status === "PENDING" ||
-    companydata.status === "REJECTED" ||
-    companydata.status === "HOLD"
-  ) {
+  if (companydata.status === "REJECTED" || companydata.status === "HOLD") {
     throw new AppError(
       status.BAD_REQUEST,
       `Your Company status is:${companydata.status}`
@@ -100,7 +94,6 @@ const verifyPayment = async (id: string) => {
 
   const companyData = await Company.findOne({
     _id: data.companyId,
-    owner: data.user,
   });
   if (!companyData) {
     throw new AppError(status.NOT_FOUND, "Company data not found");

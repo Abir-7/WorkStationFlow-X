@@ -39,8 +39,7 @@ const createCompany = (data) => __awaiter(void 0, void 0, void 0, function* () {
         fullName: data.ownerData.fullName,
         phone: data.ownerData.phone,
     };
-    let createdCompany;
-    createdCompany = yield company_model_1.Company.create(companyData);
+    const createdCompany = yield company_model_1.Company.create(companyData);
     logger_1.default.info("create company");
     const userData = {
         email: data.ownerData.email,
@@ -48,11 +47,6 @@ const createCompany = (data) => __awaiter(void 0, void 0, void 0, function* () {
     };
     const createdUser = yield user_model_1.default.create(Object.assign(Object.assign({}, userData), { role: auth_interface_1.userRoles.OWNER, authentication: { otp, expDate }, companyId: createdCompany._id }));
     yield userProfile_model_1.UserProfile.create(Object.assign(Object.assign({}, userProfileData), { user: createdUser._id }));
-    createdCompany = yield company_model_1.Company.findByIdAndUpdate(createdCompany._id, {
-        owner: createdUser._id,
-    }, { new: true })
-        .populate("owner")
-        .lean();
     yield (0, sendEmail_1.sendEmail)(data.ownerData.email, "Email Verification Code", `Your code is: ${otp}`);
     return createdCompany;
 });

@@ -13,10 +13,6 @@ const companySchema = new mongoose_1.Schema({
         totalEmployee: { type: Number, default: 0 },
     },
     website: { type: String, unique: true },
-    owner: {
-        type: mongoose_1.Schema.Types.ObjectId,
-        ref: "User",
-    },
     paymentInfo: {
         paymentId: { type: mongoose_1.Types.ObjectId, default: null, ref: "Payment" },
         expireDate: { type: Date, default: null },

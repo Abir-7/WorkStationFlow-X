@@ -11,7 +11,7 @@ export interface ICompany {
     totalEmployee: number;
   };
   website: string;
-  owner: Types.ObjectId;
+
   paymentInfo: {
     paymentId: Types.ObjectId;
     expireDate: Date;

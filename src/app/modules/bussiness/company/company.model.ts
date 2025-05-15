@@ -12,10 +12,6 @@ const companySchema = new Schema<ICompany>(
       totalEmployee: { type: Number, default: 0 },
     },
     website: { type: String, unique: true },
-    owner: {
-      type: Schema.Types.ObjectId,
-      ref: "User",
-    },
     paymentInfo: {
       paymentId: { type: Types.ObjectId, default: null, ref: "Payment" },
       expireDate: { type: Date, default: null },

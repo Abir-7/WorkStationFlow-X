@@ -18,7 +18,6 @@ const superUser = {
 
 const superUserProfile = {
   fullName: "Admin-1",
-  email: appConfig.admin.email,
   phone: appConfig.admin.mobile,
 };
 
@@ -44,8 +43,7 @@ const seedAdmin = async (): Promise<void> => {
     await session.commitTransaction();
     session.endSession();
   } catch (error: any) {
-    logger.error("Faield to create Admin.");
-
+    logger.error(error);
     await session.abortTransaction();
     session.endSession();
     //throw error;

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /* eslint-disable arrow-body-style */
-
+import { v4 as uuidv4 } from "uuid";
 import { userRoles } from "../../../interface/auth.interface";
 import getHashedPassword from "../../../utils/helper/getHashedPassword";
 import User from "../../users/user/user.model";
@@ -9,11 +9,10 @@ import { UserProfile } from "../../users/userProfile/userProfile.model";
 import { ICompany } from "./company.interface";
 import { Company } from "./company.model";
 import logger from "../../../utils/logger";
-import { sendEmail } from "../../../utils/sendEmail";
-import getExpiryTime from "../../../utils/helper/getExpiryTime";
-import getOtp from "../../../utils/helper/getOtp";
 
 // Create a new company
+import mongoose from "mongoose";
+
 const createCompany = async (data: {
   ownerData: {
     fullName: string;
@@ -27,58 +26,63 @@ const createCompany = async (data: {
     maxEmployee: string;
   };
 }) => {
-  const otp = getOtp(4);
-  const expDate = getExpiryTime(10);
+  const session = await mongoose.startSession();
+  session.startTransaction();
 
-  const companyData = {
-    name: data.companyData.name,
-    maxBranch: data.companyData.maxBranch,
-    maxEmployee: data.companyData.maxEmployee,
-    cId: "iio",
-  };
+  try {
+    const companyData = {
+      name: data.companyData.name,
+      maxBranch: data.companyData.maxBranch,
+      maxEmployee: data.companyData.maxEmployee,
+      cId: `C-${uuidv4()}`,
+    };
 
-  const userProfileData = {
-    fullName: data.ownerData.fullName,
-    phone: data.ownerData.phone,
-  };
+    const userProfileData = {
+      fullName: data.ownerData.fullName,
+      phone: data.ownerData.phone,
+    };
 
-  let createdCompany;
-  createdCompany = await Company.create(companyData);
-  logger.info("create company");
-  const userData = {
-    email: data.ownerData.email,
-    password: await getHashedPassword(data.ownerData.password),
-  };
+    const userData = {
+      email: data.ownerData.email,
+      password: await getHashedPassword(data.ownerData.password),
+    };
 
-  const createdUser = await User.create({
-    ...userData,
-    role: userRoles.OWNER,
-    authentication: { otp, expDate },
-    companyId: createdCompany._id,
-  });
+    const createdCompany = await Company.create([companyData], { session });
+    logger.info("Company created");
 
-  await UserProfile.create({
-    ...userProfileData,
-    user: createdUser._id,
-  });
+    const createdUser = await User.create(
+      [
+        {
+          ...userData,
+          role: userRoles.OWNER,
 
-  createdCompany = await Company.findByIdAndUpdate(
-    createdCompany._id,
-    {
-      owner: createdUser._id,
-    },
-    { new: true }
-  )
-    .populate("owner")
-    .lean();
+          companyId: createdCompany[0]._id,
+        },
+      ],
+      { session }
+    );
 
-  await sendEmail(
-    data.ownerData.email,
-    "Email Verification Code",
-    `Your code is: ${otp}`
-  );
+    await UserProfile.create(
+      [
+        {
+          ...userProfileData,
+          user: createdUser[0]._id,
+        },
+      ],
+      { session }
+    );
 
-  return createdCompany;
+    // Commit transaction before sending email (email can be retried independently)
+    await session.commitTransaction();
+    session.endSession();
+
+    return createdCompany[0];
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    logger.error("Transaction aborted:", error);
+    throw new Error("Can't create company. Try again.");
+  }
 };
 
 // Get a single company by ID

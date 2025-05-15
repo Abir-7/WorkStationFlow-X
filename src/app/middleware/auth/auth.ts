@@ -41,6 +41,11 @@ export const auth =
           new AppError(status.UNAUTHORIZED, "You are not authorized")
         );
       }
+      if (!userData.isVerified) {
+        return next(
+          new AppError(status.UNAUTHORIZED, "You are not authorized")
+        );
+      }
 
       if (userRole.length && !userRole.includes(decodedData.userRole)) {
         return next(
@@ -100,16 +105,17 @@ export const auth =
             );
           }
         }
-
-        if (!userData.companyId) {
-          return next(
-            new AppError(
-              status.UNAUTHORIZED,
-              "You don't have connection with any company."
-            )
-          );
-        }
       }
+
+      if (userData.role !== "ADMIN" && !userData.companyId) {
+        return next(
+          new AppError(
+            status.UNAUTHORIZED,
+            "You don't have connection with any company."
+          )
+        );
+      }
+
       //--------------------------------------------------------
       req.user = decodedData;
       return next();

@@ -22,7 +22,7 @@ export async function sendEmail(email: string, subject: string, text: string) {
     });
 
     const info = await transporter.sendMail({
-      from: `"AiFinanceHub" ${appConfig.email.from}`, // Sender address
+      from: `"WorkStationFlow-X" ${appConfig.email.from}`, // Sender address
       to: email, // Recipient's email
       subject: `${subject}`,
       text: text,
