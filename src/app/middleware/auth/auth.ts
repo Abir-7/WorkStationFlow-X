@@ -106,10 +106,21 @@ export const auth =
         if (userData.role === "LEADER" || userData.role === "EMPLOYEE") {
           await userData.populate({
             path: "teamId",
-            //! todo -------
+            populate: {
+              path: "branchId",
+              populate: "companyId",
+            },
           });
-        }
 
+          if (!userData.teamId._id || !userData.teamId.branchId.companyId._id) {
+            return next(
+              new AppError(status.UNAUTHORIZED, "You do not work here")
+            );
+          }
+
+          companyStaus = userData.teamId.branchId.companyId.status;
+        }
+        console.log(userData);
         if (
           companyStaus === "DEACTIVATED" ||
           companyStaus === "REJECTED" ||

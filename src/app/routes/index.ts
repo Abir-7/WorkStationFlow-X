@@ -5,6 +5,7 @@ import { AuthRoute } from "../modules/auth/auth.route";
 import { CompanyRoute } from "../modules/bussiness/company/company.route";
 import { PaymentRoutes } from "../modules/payment/payment.route";
 import { BranchRoutes } from "../modules/bussiness/branch/branch.route";
+import { EmployeeRoutes } from "../modules/bussiness/employee/employee.route";
 
 const router = Router();
 const apiRoutes = [
@@ -13,6 +14,7 @@ const apiRoutes = [
   { path: "/company", route: CompanyRoute },
   { path: "/branch", route: BranchRoutes },
   { path: "/team", route: TeamRoutes },
+  { path: "/employee", route: EmployeeRoutes },
   { path: "/payment", route: PaymentRoutes },
 ];
 apiRoutes.forEach((route) => router.use(route.path, route.route));
