@@ -1,3 +1,4 @@
+import { TeamRoutes } from "./../modules/bussiness/team/team.route";
 import { Router } from "express";
 import { UserRoute } from "../modules/users/user/user.route";
 import { AuthRoute } from "../modules/auth/auth.route";
@@ -11,6 +12,7 @@ const apiRoutes = [
   { path: "/auth", route: AuthRoute },
   { path: "/company", route: CompanyRoute },
   { path: "/branch", route: BranchRoutes },
+  { path: "/team", route: TeamRoutes },
   { path: "/payment", route: PaymentRoutes },
 ];
 apiRoutes.forEach((route) => router.use(route.path, route.route));

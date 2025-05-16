@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { NextFunction, Request, Response } from "express";
 import AppError from "../../errors/AppError";
@@ -8,6 +9,8 @@ import { jsonWebToken } from "../../utils/jwt/jwt";
 import { appConfig } from "../../config";
 import User from "../../modules/users/user/user.model";
 import { Company } from "../../modules/bussiness/company/company.model";
+import path from "path";
+import { populate } from "dotenv";
 
 export const auth =
   (...userRole: TUserRole[]) =>
@@ -30,11 +33,11 @@ export const auth =
       }
 
       const decodedData = jsonWebToken.verifyJwt(
-        token,
+        token.trim(),
         appConfig.jwt.jwt_access_secret as string
       );
 
-      const userData = await User.findById(decodedData.userId);
+      const userData = (await User.findById(decodedData.userId)) as any;
 
       if (!userData) {
         return next(
@@ -53,69 +56,86 @@ export const auth =
         );
       }
 
-      if (
-        userData.role !== decodedData.userRole ||
-        userData.email !== decodedData.userEmail
-      ) {
-        return next(
-          new AppError(status.UNAUTHORIZED, "You are not authorized")
-        );
-      }
-
       //--------------------------------------------------------
       //check employee working status and company
-      if (
-        userData.role === "EMPLOYEE" ||
-        userData.role === "LEADER" ||
-        userData.role === "MANAGER"
-      ) {
-        if (
-          userData.status === "RESIGNED" ||
-          userData.status === "TERMINATED"
-        ) {
-          return next(
-            new AppError(status.UNAUTHORIZED, `You are ${userData.status}.`)
-          );
-        }
 
-        if (userData.companyId) {
-          const companyData = await Company.findById(userData.companyId);
+      let companyStaus;
+
+      if (userData.role !== "ADMIN") {
+        if (
+          userData.role === "EMPLOYEE" ||
+          userData.role === "LEADER" ||
+          userData.role === "MANAGER"
+        ) {
           if (
-            companyData?.status === "DEACTIVATED" ||
-            companyData?.status === "REJECTED" ||
-            companyData?.status === "HOLD" ||
-            companyData?.status === "PENDING" ||
-            companyData?.status === "ACCEPTED"
+            userData.status === "RESIGNED" ||
+            userData.status === "TERMINATED"
           ) {
             return next(
-              new AppError(
-                status.UNAUTHORIZED,
-                `${
-                  companyData?.status === "DEACTIVATED"
-                    ? "Your Company is DEACTIVATED."
-                    : companyData?.status === "REJECTED"
-                    ? "Your Company is REJECTED."
-                    : companyData?.status === "HOLD"
-                    ? "Wait for verify your payment"
-                    : companyData?.status === "PENDING"
-                    ? "Your company is under review"
-                    : "Your company is accepted, you can pay now."
-                }`
-              )
+              new AppError(status.UNAUTHORIZED, `You are ${userData.status}.`)
             );
           }
         }
-      }
 
-      if (userData.role !== "ADMIN" && !userData.companyId) {
-        return next(
-          new AppError(
-            status.UNAUTHORIZED,
-            "You don't have connection with any company."
-          )
-        );
-      }
+        //for owner
+        if (userData.role === "OWNER") {
+          //populate company
+          await userData.populate("companyId");
+          if (!userData.companyId._id) {
+            return next(
+              new AppError(status.UNAUTHORIZED, "You don't have any company")
+            );
+          }
+          companyStaus = userData.companyId.status;
+        }
 
+        //for manager
+        if (userData.role === "MANAGER") {
+          await userData.populate({
+            path: "branchId",
+            populate: "companyId",
+          });
+          if (!userData.branchId._id || !userData.branchId.companyId._id) {
+            return next(
+              new AppError(status.UNAUTHORIZED, "You are not a branch manager")
+            );
+          }
+          companyStaus = userData.branchId.companyId.status;
+        }
+
+        if (userData.role === "LEADER" || userData.role === "EMPLOYEE") {
+          await userData.populate({
+            path: "teamId",
+            //! todo -------
+          });
+        }
+
+        if (
+          companyStaus === "DEACTIVATED" ||
+          companyStaus === "REJECTED" ||
+          companyStaus === "HOLD" ||
+          companyStaus === "PENDING" ||
+          companyStaus === "ACCEPTED"
+        ) {
+          return next(
+            new AppError(
+              status.UNAUTHORIZED,
+              `${
+                companyStaus === "DEACTIVATED"
+                  ? "Your Company is DEACTIVATED."
+                  : companyStaus === "REJECTED"
+                  ? "Your Company is REJECTED."
+                  : companyStaus === "HOLD"
+                  ? "Wait for verify your payment"
+                  : companyStaus === "PENDING"
+                  ? "Your company is under review"
+                  : "Your company is accepted, you can pay now."
+              }`
+            )
+          );
+        }
+      }
+      console.log(companyStaus);
       //--------------------------------------------------------
       req.user = decodedData;
       return next();

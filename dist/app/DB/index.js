@@ -29,7 +29,6 @@ const superUser = {
 };
 const superUserProfile = {
     fullName: "Admin-1",
-    email: config_1.appConfig.admin.email,
     phone: config_1.appConfig.admin.mobile,
 };
 const seedAdmin = () => __awaiter(void 0, void 0, void 0, function* () {
@@ -54,7 +53,7 @@ const seedAdmin = () => __awaiter(void 0, void 0, void 0, function* () {
         session.endSession();
     }
     catch (error) {
-        logger_1.default.error("Faield to create Admin.");
+        logger_1.default.error(error);
         yield session.abortTransaction();
         session.endSession();
         //throw error;

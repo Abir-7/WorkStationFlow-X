@@ -77,11 +77,11 @@ const createCompany = async (data: {
     session.endSession();
 
     return createdCompany[0];
-  } catch (error) {
+  } catch (error: any) {
     await session.abortTransaction();
     session.endSession();
     logger.error("Transaction aborted:", error);
-    throw new Error("Can't create company. Try again.");
+    throw new Error(error);
   }
 };
 

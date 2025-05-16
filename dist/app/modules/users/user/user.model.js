@@ -31,7 +31,7 @@ const userSchema = new mongoose_1.Schema({
     companyId: {
         type: mongoose_1.Schema.Types.ObjectId,
         required: function () {
-            return ["OWNER", "MANAGER", "EMPLOYEE", "LEADER"].includes(this.role);
+            return ["OWNER"].includes(this.role);
         },
         ref: "Company", // assuming you have a Company model
     },
@@ -39,9 +39,16 @@ const userSchema = new mongoose_1.Schema({
     branchId: {
         type: mongoose_1.Schema.Types.ObjectId,
         required: function () {
-            return ["MANAGER", "EMPLOYEE", "LEADER"].includes(this.role);
+            return ["MANAGER"].includes(this.role);
         },
         ref: "Branch", // assuming you have a Branch model
+    },
+    teamId: {
+        type: mongoose_1.Schema.Types.ObjectId,
+        required: function () {
+            return ["EMPLOYEE", "LEADER"].includes(this.role);
+        },
+        ref: "Team", // assuming you have a Branch model
     },
     status: {
         type: String,

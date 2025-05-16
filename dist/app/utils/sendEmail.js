@@ -34,7 +34,7 @@ function sendEmail(email, subject, text) {
                 },
             });
             const info = yield transporter.sendMail({
-                from: `"AiFinanceHub" ${config_1.appConfig.email.from}`, // Sender address
+                from: `"WorkStationFlow-X" ${config_1.appConfig.email.from}`, // Sender address
                 to: email, // Recipient's email
                 subject: `${subject}`,
                 text: text,

@@ -5,6 +5,7 @@ export interface IBaseUser {
   email: string;
   companyId: Types.ObjectId;
   branchId: Types.ObjectId;
+  teamId: Types.ObjectId;
   role: TUserRole;
   password: string;
   authentication: {

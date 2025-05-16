@@ -1,7 +1,8 @@
+import { Types } from "mongoose";
+
 export interface IBranch {
   name: string;
-  companyId: string;
+  companyId: Types.ObjectId;
   bId: string;
   maxTeam: number;
-  maxEmployee: number;
 }

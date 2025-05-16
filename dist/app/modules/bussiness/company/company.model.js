@@ -12,7 +12,7 @@ const companySchema = new mongoose_1.Schema({
         totalBranch: { type: Number, default: 0 },
         totalEmployee: { type: Number, default: 0 },
     },
-    website: { type: String, unique: true },
+    website: { type: String, unique: true, sparse: true },
     paymentInfo: {
         paymentId: { type: mongoose_1.Types.ObjectId, default: null, ref: "Payment" },
         expireDate: { type: Date, default: null },

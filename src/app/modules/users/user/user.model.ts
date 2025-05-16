@@ -20,7 +20,7 @@ const userSchema = new Schema<IUser>({
   companyId: {
     type: Schema.Types.ObjectId,
     required: function (this: any) {
-      return ["OWNER", "MANAGER", "EMPLOYEE", "LEADER"].includes(this.role);
+      return ["OWNER"].includes(this.role);
     },
     ref: "Company", // assuming you have a Company model
   },
@@ -28,9 +28,16 @@ const userSchema = new Schema<IUser>({
   branchId: {
     type: Schema.Types.ObjectId,
     required: function (this: any) {
-      return ["MANAGER", "EMPLOYEE", "LEADER"].includes(this.role);
+      return ["MANAGER"].includes(this.role);
     },
     ref: "Branch", // assuming you have a Branch model
+  },
+  teamId: {
+    type: Schema.Types.ObjectId,
+    required: function (this: any) {
+      return ["EMPLOYEE", "LEADER"].includes(this.role);
+    },
+    ref: "Team", // assuming you have a Branch model
   },
   status: {
     type: String,

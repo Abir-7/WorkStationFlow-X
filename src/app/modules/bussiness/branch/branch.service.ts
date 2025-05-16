@@ -38,16 +38,13 @@ const createBranch = async (
     const branchData = {
       name: data.branchData.name,
       maxTeam: data.branchData.maxTeam,
-      maxEmployee: data.branchData.maxEmployee,
-      bId: `C-${uuidv4()}`,
+      bId: `B-${uuidv4()}`,
       companyId: userInfo.companyId,
     };
 
     const userData = {
       email: data.userData.email,
       password: await getHashedPassword(data.userData.password),
-
-      companyId: userInfo.companyId,
     };
 
     const userProfileData = {

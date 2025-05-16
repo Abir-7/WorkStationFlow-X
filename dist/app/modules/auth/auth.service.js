@@ -24,6 +24,8 @@ const sendEmail_1 = require("../../utils/sendEmail");
 const getHashedPassword_1 = __importDefault(require("../../utils/helper/getHashedPassword"));
 const config_1 = require("../../config");
 const userLogin = (loginData) => __awaiter(void 0, void 0, void 0, function* () {
+    const otp = (0, getOtp_1.default)(4);
+    const expDate = (0, getExpiryTime_1.default)(10);
     const userData = yield user_model_1.default.findOne({ email: loginData.email })
         .select("+password")
         .populate("companyId");
@@ -31,7 +33,13 @@ const userLogin = (loginData) => __awaiter(void 0, void 0, void 0, function* () 
         throw new AppError_1.default(http_status_1.default.BAD_REQUEST, "Please check your email");
     }
     if (userData.isVerified === false) {
-        throw new AppError_1.default(http_status_1.default.BAD_REQUEST, "Please verify your email.");
+        // Send email outside the transaction
+        userData.authentication.otp = otp;
+        userData.authentication.expDate = expDate;
+        console.log(userData.email);
+        yield (0, sendEmail_1.sendEmail)(userData.email, "Email Verification Code", `Your code is: ${otp}`);
+        yield userData.save();
+        throw new AppError_1.default(http_status_1.default.BAD_REQUEST, "Please verify your email. Check your email.");
     }
     const isPassMatch = yield userData.comparePassword(loginData.password);
     if (!isPassMatch) {
