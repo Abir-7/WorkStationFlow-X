@@ -49,6 +49,11 @@
             "date": 1747332067611,
             "name": "F:\\TeamProject\\WorkStationFlow-X\\logs\\2025-05-16-app.log",
             "hash": "059fd2dcad6559988e3cff387a61827ac02d7e056a40cf814a54375603faef0a"
+        },
+        {
+            "date": 1747746495434,
+            "name": "F:\\TeamProject\\WorkStationFlow-X\\logs\\2025-05-20-app.log",
+            "hash": "e6a8e81fcb58b63b04d56e08bde3d7d8ac427a3d276cf95003ac22ee155244d7"
         }
     ],
     "hashType": "sha256"
