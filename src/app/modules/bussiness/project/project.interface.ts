@@ -11,7 +11,7 @@ export interface IProject {
   salesName: string;
 
   googleSheetLink: string;
-  projectGroup?: Types.ObjectId;
+  projectGrouplink?: string;
   status: IProjectStatus;
   isDeleted: boolean;
 }
@@ -43,6 +43,7 @@ export const ProjectStatus = {
   COMPLETED: "COMPLETED",
   ONGOING: "ONGOING",
   CENCELED: "CENCELED",
+  HOLD: "HOLD",
 } as const;
 
 export const projectStatus = Object.values(ProjectStatus);
