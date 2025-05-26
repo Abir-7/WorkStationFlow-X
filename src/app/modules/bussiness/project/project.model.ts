@@ -30,7 +30,7 @@ const projectPhaseSchema = new Schema<IProjectPhase>(
     status: {
       type: String,
       enum: projectPhaseStatus,
-      required: true,
+      default: "INACTIVE",
     },
   },
   { _id: true }

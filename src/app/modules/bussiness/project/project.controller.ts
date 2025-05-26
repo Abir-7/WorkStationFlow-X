@@ -14,6 +14,21 @@ const addProject = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const updateProject = catchAsync(async (req: Request, res: Response) => {
+  const result = await ProjectService.updateProject(
+    req.params.id,
+    req.body,
+    req.user.userId
+  );
+  sendResponse(res, {
+    success: true,
+    statusCode: status.CREATED,
+    message: "Project added.",
+    data: result,
+  });
+});
+
 export const ProjectController = {
   addProject,
+  updateProject,
 };

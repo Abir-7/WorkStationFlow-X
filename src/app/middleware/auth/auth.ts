@@ -120,7 +120,7 @@ export const auth =
 
           companyStaus = userData.teamId.branchId.companyId.status;
         }
-        console.log(userData);
+
         if (
           companyStaus === "DEACTIVATED" ||
           companyStaus === "REJECTED" ||
