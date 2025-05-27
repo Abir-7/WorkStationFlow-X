@@ -27,8 +27,22 @@ const updateProject = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+const updatePhaseByMember = catchAsync(async (req: Request, res: Response) => {
+  const result = await ProjectService.updatePhaseByMember(
+    req.user.userId,
+    req.params.id,
+    req.body
+  );
+  sendResponse(res, {
+    success: true,
+    statusCode: status.CREATED,
+    message: "Project added.",
+    data: result,
+  });
+});
 
 export const ProjectController = {
   addProject,
   updateProject,
+  updatePhaseByMember,
 };

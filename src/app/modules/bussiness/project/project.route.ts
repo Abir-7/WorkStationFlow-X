@@ -10,5 +10,10 @@ router.patch(
   auth("LEADER"),
   ProjectController.updateProject
 );
+router.patch(
+  "/update-project-phase-by-member/:id",
+  auth("EMPLOYEE"),
+  ProjectController.updatePhaseByMember
+);
 
 export const ProjectRoute = router;
