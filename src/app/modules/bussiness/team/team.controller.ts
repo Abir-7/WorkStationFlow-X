@@ -24,8 +24,9 @@ const getTeamById = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-const getAllTeams = catchAsync(async (req: Request, res: Response) => {
-  const result = await TeamService.getAllTeams(req.user.userId);
+// branch manager
+const getAllTeamsBasicData = catchAsync(async (req: Request, res: Response) => {
+  const result = await TeamService.getAllTeamsBasicData(req.user.userId);
   sendResponse(res, {
     success: true,
     statusCode: status.OK,
@@ -33,6 +34,18 @@ const getAllTeams = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+
+const getBrarchQuickViewData = catchAsync(
+  async (req: Request, res: Response) => {
+    const result = await TeamService.getBrarchQuickViewData(req.user.userId);
+    sendResponse(res, {
+      success: true,
+      statusCode: status.OK,
+      message: "Teams retrieved",
+      data: result,
+    });
+  }
+);
 
 const updateTeam = catchAsync(async (req: Request, res: Response) => {
   const result = await TeamService.updateTeam(req.params.id, req.body);
@@ -57,7 +70,8 @@ const deleteTeam = catchAsync(async (req: Request, res: Response) => {
 export const TeamController = {
   createTeam,
   getTeamById,
-  getAllTeams,
+  getAllTeamsBasicData,
   updateTeam,
   deleteTeam,
+  getBrarchQuickViewData,
 };

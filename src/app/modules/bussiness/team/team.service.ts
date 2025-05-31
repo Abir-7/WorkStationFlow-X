@@ -84,20 +84,29 @@ const getTeamById = async (id: string): Promise<object> => ({
   message: `Mock team with id ${id} retrieved`,
 });
 
-const getAllTeams = async (userId: string) => {
+// branch manager-------------->
+const getAllTeamsBasicData = async (userId: string) => {
   const user = await User.findById(userId);
+  if (!user) throw new AppError(status.NOT_FOUND, "User not found.");
+  if (!user.branchId)
+    throw new AppError(status.NOT_FOUND, "User branchId not found.");
 
   const now = new Date();
   const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-  const firstDayOfNextMonth = new Date(
+  // const firstDayOfNextMonth = new Date(
+  //   now.getFullYear(),
+  //   now.getMonth() + 1,
+  //   1
+  // );
+  const lastDayOfMonth = new Date(
     now.getFullYear(),
     now.getMonth() + 1,
-    1
+    0, // Day 0 of next month = last day of current month
+    23,
+    59,
+    59,
+    999
   );
-
-  if (!user) {
-    throw new AppError(status.NOT_FOUND, "User not found.");
-  }
 
   const aggregateArray: PipelineStage[] = [
     {
@@ -113,14 +122,7 @@ const getAllTeams = async (userId: string) => {
         as: "allProjects",
       },
     },
-  ];
-
-  if (user.role === "MANAGER") {
-    if (!user.branchId) {
-      throw new AppError(status.NOT_FOUND, "User branchId not found.");
-    }
-
-    aggregateArray.push({
+    {
       $addFields: {
         presentMonthTotalDelivery: {
           $sum: {
@@ -131,9 +133,7 @@ const getAllTeams = async (userId: string) => {
                     $reduce: {
                       input: "$allProjects",
                       initialValue: [],
-                      in: {
-                        $concatArrays: ["$$value", "$$this.phases"],
-                      },
+                      in: { $concatArrays: ["$$value", "$$this.phases"] },
                     },
                   },
                   as: "phase",
@@ -151,7 +151,6 @@ const getAllTeams = async (userId: string) => {
             },
           },
         },
-
         totalWorkload: {
           $sum: {
             $map: {
@@ -169,7 +168,6 @@ const getAllTeams = async (userId: string) => {
             },
           },
         },
-
         totalDeliver: {
           $sum: {
             $map: {
@@ -191,7 +189,6 @@ const getAllTeams = async (userId: string) => {
             },
           },
         },
-
         runningProjectsThisMonth: {
           $size: {
             $filter: {
@@ -201,7 +198,7 @@ const getAllTeams = async (userId: string) => {
                 $and: [
                   { $eq: ["$$project.status", "ONGOING"] },
                   { $gte: ["$$project.createdAt", firstDayOfMonth] },
-                  { $lt: ["$$project.createdAt", firstDayOfNextMonth] },
+                  { $lt: ["$$project.createdAt", lastDayOfMonth] },
                 ],
               },
             },
@@ -216,35 +213,142 @@ const getAllTeams = async (userId: string) => {
                 $and: [
                   { $eq: ["$$project.status", "COMPLETED"] },
                   { $gte: ["$$project.createdAt", firstDayOfMonth] },
-                  { $lt: ["$$project.createdAt", firstDayOfNextMonth] },
+                  { $lt: ["$$project.createdAt", lastDayOfMonth] },
                 ],
               },
             },
           },
         },
       },
-    });
-  }
+    },
+    {
+      $project: {
+        allProjects: 0, // exclude large array from response
+      },
+    },
+  ];
+
   const teamData = await Team.aggregate(aggregateArray);
   return teamData;
+};
+
+const getBrarchQuickViewData = async (userId: string) => {
+  const user = await User.findById(userId);
+  if (!user) throw new AppError(status.NOT_FOUND, "User not found.");
+  if (!user.branchId)
+    throw new AppError(status.NOT_FOUND, "User branchId not found.");
+
+  const now = new Date();
+  const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const lastDayOfMonth = new Date(
+    now.getFullYear(),
+    now.getMonth() + 1,
+    0,
+    23,
+    59,
+    59,
+    999
+  );
+
+  const aggregateArray: PipelineStage[] = [
+    {
+      $match: {
+        branchId: new mongoose.Types.ObjectId(user.branchId),
+      },
+    },
+    {
+      $lookup: {
+        from: "projects",
+        localField: "_id",
+        foreignField: "teamId",
+        as: "allProjects",
+      },
+    },
+    {
+      $addFields: {
+        completedPhaseBudgetThisMonth: {
+          $sum: {
+            $map: {
+              input: {
+                $filter: {
+                  input: {
+                    $reduce: {
+                      input: "$allProjects.phases",
+                      initialValue: [],
+                      in: { $concatArrays: ["$$value", "$$this"] },
+                    },
+                  },
+                  as: "phase",
+                  cond: {
+                    $and: [
+                      { $eq: ["$$phase.status", "COMPLETED"] },
+                      { $gte: ["$$phase.updatedAt", firstDayOfMonth] },
+                      { $lte: ["$$phase.updatedAt", lastDayOfMonth] },
+                    ],
+                  },
+                },
+              },
+              as: "phase",
+              in: "$$phase.budget",
+            },
+          },
+        },
+      },
+    },
+    {
+      $group: {
+        _id: null,
+        totalTeams: { $sum: 1 },
+        totalDeliveryTarget: { $sum: "$delivaryTarget" },
+        totalMonthlyDelivery: { $sum: "$completedPhaseBudgetThisMonth" },
+      },
+    },
+    {
+      $addFields: {
+        totalDueDelivery: {
+          $subtract: ["$totalDeliveryTarget", "$totalMonthlyDelivery"],
+        },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        totalTeams: 1,
+        totalDeliveryTarget: 1,
+        totalMonthlyDelivery: 1,
+        totalDueDelivery: 1,
+      },
+    },
+  ];
+
+  const result = await Team.aggregate(aggregateArray);
+  return (
+    result[0] || {
+      totalTeams: 0,
+      totalDeliveryTarget: 0,
+      totalMonthlyDelivery: 0,
+      totalDueDelivery: 0,
+    }
+  );
 };
 
 const updateTeam = async (
   id: string,
   updateData: unknown
 ): Promise<object> => ({
-  message: `Mock team with id ${id} updated`,
+  message: ` team with id ${id} updated`,
   updateData,
 });
 
 const deleteTeam = async (id: string): Promise<object> => ({
-  message: `Mock team with id ${id} deleted`,
+  message: ` team with id ${id} deleted`,
 });
 
 export const TeamService = {
   createTeam,
   getTeamById,
-  getAllTeams,
+  getAllTeamsBasicData,
   updateTeam,
   deleteTeam,
+  getBrarchQuickViewData,
 };
