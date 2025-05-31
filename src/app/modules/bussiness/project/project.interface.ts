@@ -22,6 +22,7 @@ export interface IProjectPhase {
   budget: number;
   members: Types.ObjectId[];
   deadline: Date;
+  progress: number;
   status: IPhaseStatus;
 }
 

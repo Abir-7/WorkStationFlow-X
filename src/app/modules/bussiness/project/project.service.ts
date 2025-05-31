@@ -18,7 +18,7 @@ const addProject = async (data: Partial<IProject>, userId: string) => {
 
   const addNewProject = await Project.create({
     ...data,
-    teamId: userData?._id,
+    teamId: userData.teamId,
   });
 
   return addNewProject;
@@ -66,6 +66,8 @@ const updateProject = async (
 
   return await projectData.save();
 };
+
+// ------------------- EMPLOYEE ------------------- //
 
 const updatePhaseByMember = async (
   userId: string,

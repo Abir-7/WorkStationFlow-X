@@ -69,6 +69,26 @@
             "date": 1748357706343,
             "name": "F:\\TeamProject\\WorkStationFlow-X\\logs\\2025-05-27-app.log",
             "hash": "c4ff818de68ae73aeb19ce7363e57ef56e17a04f0c1c5adc304c739d7473c5db"
+        },
+        {
+            "date": 1748442906694,
+            "name": "F:\\TeamProject\\WorkStationFlow-X\\logs\\2025-05-28-app.log",
+            "hash": "f4fed993f525d4b601209b8906fa34335f81b61d3313d0c6495f4651ace59cac"
+        },
+        {
+            "date": 1748538582000,
+            "name": "F:\\TeamProject\\WorkStationFlow-X\\logs\\2025-05-29-app.log",
+            "hash": "536104dce40f137551d3ca8eb9a19f78adbc3cf3348d9195c83ad74a76ec9f49"
+        },
+        {
+            "date": 1748543164733,
+            "name": "F:\\TeamProject\\WorkStationFlow-X\\logs\\2025-05-30-app.log",
+            "hash": "6bca15db9ab07538f407bf1f53af7021a21fb7e4bf6221fd4df586249fe06910"
+        },
+        {
+            "date": 1748702327059,
+            "name": "F:\\TeamProject\\WorkStationFlow-X\\logs\\2025-05-31-app.log",
+            "hash": "1803114c3feb258fcfd43b099e8a2712f1867ecc4e2b903bd1f2d23e704b0d52"
         }
     ],
     "hashType": "sha256"

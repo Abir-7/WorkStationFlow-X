@@ -5,4 +5,5 @@ export interface ITeam {
   branchId: Types.ObjectId;
   tId: string;
   maxEmployee: number;
+  delivaryTarget: number;
 }

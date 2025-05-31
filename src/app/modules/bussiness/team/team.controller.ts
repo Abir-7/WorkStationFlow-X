@@ -25,11 +25,11 @@ const getTeamById = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getAllTeams = catchAsync(async (req: Request, res: Response) => {
-  const result = await TeamService.getAllTeams();
+  const result = await TeamService.getAllTeams(req.user.userId);
   sendResponse(res, {
     success: true,
     statusCode: status.OK,
-    message: "Teams retrieved (mock)",
+    message: "Teams retrieved",
     data: result,
   });
 });

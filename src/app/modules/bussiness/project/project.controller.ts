@@ -4,6 +4,8 @@ import sendResponse from "../../../utils/sendResponse";
 import status from "http-status";
 import { ProjectService } from "./project.service";
 
+// ------------------ LEADER ------------------ //
+
 const addProject = catchAsync(async (req: Request, res: Response) => {
   const result = await ProjectService.addProject(req.body, req.user.userId);
   sendResponse(res, {
@@ -27,6 +29,9 @@ const updateProject = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+
+// ------------------ EMPLOYE ------------------ //
+
 const updatePhaseByMember = catchAsync(async (req: Request, res: Response) => {
   const result = await ProjectService.updatePhaseByMember(
     req.user.userId,

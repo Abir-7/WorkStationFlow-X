@@ -32,8 +32,13 @@ const projectPhaseSchema = new Schema<IProjectPhase>(
       enum: projectPhaseStatus,
       default: "INACTIVE",
     },
+    progress: {
+      type: Number,
+      default: 0,
+      max: 100,
+    },
   },
-  { _id: true }
+  { _id: true, timestamps: true }
 );
 
 const projectSchema = new Schema<IProject>(

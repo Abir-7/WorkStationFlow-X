@@ -23,6 +23,11 @@ const teamSchema = new Schema<ITeam>(
       required: true,
       min: 1,
     },
+    delivaryTarget: {
+      type: Number,
+
+      min: 1,
+    },
   },
   {
     timestamps: true,
