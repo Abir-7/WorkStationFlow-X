@@ -17,23 +17,6 @@ const http_status_1 = __importDefault(require("http-status"));
 const catchAsync_1 = __importDefault(require("../../../utils/catchAsync"));
 const sendResponse_1 = __importDefault(require("../../../utils/sendResponse"));
 const user_service_1 = require("./user.service");
-const getRelativeFilePath_1 = require("../../../middleware/fileUpload/getRelativeFilePath");
-const createUser = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
-    const userData = req.body;
-    let image = null;
-    if (req.file) {
-        image = (0, getRelativeFilePath_1.getRelativePath)((_a = req.file) === null || _a === void 0 ? void 0 : _a.path);
-    }
-    userData.userProfileData.image = image;
-    const result = yield user_service_1.UserService.createUser(Object.assign(Object.assign({}, userData), { image }));
-    (0, sendResponse_1.default)(res, {
-        success: true,
-        statusCode: http_status_1.default.OK,
-        message: "User successfully created.Check your email for code.",
-        data: result,
-    });
-}));
 const updateProfileImage = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     const filePath = (_a = req.file) === null || _a === void 0 ? void 0 : _a.path;
@@ -56,7 +39,6 @@ const updateProfileData = (0, catchAsync_1.default)((req, res) => __awaiter(void
     });
 }));
 exports.UserController = {
-    createUser,
     updateProfileImage,
     updateProfileData,
 };

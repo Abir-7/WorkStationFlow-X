@@ -141,7 +141,7 @@ const getAllTeamsBasicData = async (userId: string) => {
                     $and: [
                       { $eq: ["$$phase.status", "COMPLETED"] },
                       { $gte: ["$$phase.updatedAt", firstDayOfMonth] },
-                      { $lt: ["$$phase.updatedAt", firstDayOfNextMonth] },
+                      { $lt: ["$$phase.updatedAt", lastDayOfMonth] },
                     ],
                   },
                 },

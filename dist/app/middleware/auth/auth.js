@@ -74,8 +74,15 @@ const auth = (...userRole) => (req, res, next) => __awaiter(void 0, void 0, void
             if (userData.role === "LEADER" || userData.role === "EMPLOYEE") {
                 yield userData.populate({
                     path: "teamId",
-                    //! todo -------
+                    populate: {
+                        path: "branchId",
+                        populate: "companyId",
+                    },
                 });
+                if (!userData.teamId._id || !userData.teamId.branchId.companyId._id) {
+                    return next(new AppError_1.default(http_status_1.default.UNAUTHORIZED, "You do not work here"));
+                }
+                companyStaus = userData.teamId.branchId.companyId.status;
             }
             if (companyStaus === "DEACTIVATED" ||
                 companyStaus === "REJECTED" ||
